@@ -1,3 +1,9 @@
+# Exe compilation files
+jre/**
+config.xml
+jumbo_cactuar.ico
+*.exe
+
 # Data files
 data/**
 !data/enemy_names.txt
