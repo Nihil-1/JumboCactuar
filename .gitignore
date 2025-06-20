@@ -1,3 +1,9 @@
+# Data files
+data/**
+!data/enemy_names.txt
+!data/battle_stages.txt
+!data/jumbo_cactuar.png
+
 # Compiled class file
 *.class
 
