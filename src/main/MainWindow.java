@@ -1180,10 +1180,10 @@ public class MainWindow extends JFrame {
 				"CTRL+O: Open<br>" + //
 				"CTRL+S: Save As<br>" + //
 				"ESC: Exit<br><br>" + //
-				"Dragging and dropping to load .out files is supported,<br>" + //
-				"both in window and directly on the .exe when opening the program.<br><br>" + //
-				"Use the C buttons to copy parts of encounter data,<br>" + //
-				"then use the P buttons to paste it into another encounter.<br><br>" + //
+				"You can drag and drop .out files to load them, either inside the program window<br>" + //
+				"or directly onto the .exe when starting the program.<br><br>" + //
+				"You can click the C buttons to copy parts of encounter data,<br>" + "then click the P buttons to paste them into another encounter,<br>"
+				+ "or, in the case of Enemy Slots, you can also paste within the same encounter.<br><br>" + //
 				"<a href=\"https://hobbitdur.github.io/FF8ModdingWiki/technical-reference/battle/encounter-codes/\">Encounters list</a><br>" + //
 				"<a href=\"https://hobbitdur.github.io/FF8ModdingWiki/technical-reference/battle/battle-structure-sceneout/\">Info on scene.out's format</a>" + //
 				"</body></html>";//
