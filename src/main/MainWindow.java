@@ -33,6 +33,10 @@ import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -879,6 +883,22 @@ public class MainWindow extends JFrame {
 		loadEncounter(encs[(int) encIdSpinner.getValue()], true);
 	}
 
+	public static void writeEncountersByBattleStage(Encounter[] encs, String filename) {
+		// Map battleStage -> list of encounter indices
+		Map<Integer, List<Integer>> grouped = IntStream.range(0, encs.length).boxed().collect(Collectors.groupingBy(i -> encs[i].getBattleStage(), TreeMap::new, // Keeps keys sorted
+				Collectors.toList()));
+
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+			for (Map.Entry<Integer, List<Integer>> entry : grouped.entrySet()) {
+				writer.write("Battle Stage: " + entry.getKey() + " - " + entry.getValue());
+				writer.newLine();
+			}
+			System.out.println("Encounters by Battle Stage successfully written to " + filename);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void writeAllUnknownsToFile(Encounter[] encs, String filename) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
 			for (int encId = 0; encId < encs.length; encId++) {
@@ -917,7 +937,7 @@ public class MainWindow extends JFrame {
 				// New line between encs
 				writer.newLine();
 			}
-			System.out.println("Unknowns successfully written to " + filename);
+			System.out.println("Cams successfully written to " + filename);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -935,7 +955,7 @@ public class MainWindow extends JFrame {
 			while (line != null) {
 				String id = "";
 				if (i < 10) id = "  " + i;
-				else if (i < 99) id += " " + i;
+				else if (i < 100) id += " " + i;
 				else id = "" + i;
 				strings.add(id + " - " + line);
 				line = reader.readLine();
