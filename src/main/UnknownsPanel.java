@@ -57,25 +57,25 @@ public class UnknownsPanel {
 		panel.add(unknown4Lbl);
 
 		unknown0TxFld = new JTextField(47);
-		unknown0TxFld.setName("Unknown 1");
+		unknown0TxFld.setName("Unknown 0");
 		unknown0TxFld.setBounds(145, 18, 385, 22);
 		unknown0TxFld.setFont(new Font("Monospaced", Font.PLAIN, 14));
 		panel.add(unknown0TxFld);
 
 		unknown1TxFld = new JTextField(47);
-		unknown1TxFld.setName("Unknown 2");
+		unknown1TxFld.setName("Unknown 1");
 		unknown1TxFld.setBounds(145, 44, 385, 22);
 		unknown1TxFld.setFont(new Font("Monospaced", Font.PLAIN, 14));
 		panel.add(unknown1TxFld);
 
 		unknown2TxFld = new JTextField(47);
-		unknown2TxFld.setName("Unknown 3");
+		unknown2TxFld.setName("Unknown 2");
 		unknown2TxFld.setBounds(145, 70, 385, 22);
 		unknown2TxFld.setFont(new Font("Monospaced", Font.PLAIN, 14));
 		panel.add(unknown2TxFld);
 
 		unknown3TxFld = new JTextField(31);
-		unknown3TxFld.setName("Unknown 4");
+		unknown3TxFld.setName("Unknown 3");
 		unknown3TxFld.setBounds(145, 96, 192, 22);
 		unknown3TxFld.setFont(new Font("Monospaced", Font.PLAIN, 14));
 		panel.add(unknown3TxFld);

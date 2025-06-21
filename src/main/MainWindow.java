@@ -70,6 +70,7 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.text.AbstractDocument;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -1139,6 +1140,8 @@ public class MainWindow extends JFrame {
 
 		Display display = new Display();
 		Shell shell = new Shell(display);
+		Image imgIcon = new Image(display, "data/jumbo_cactuar.png");
+		shell.setImage(imgIcon);
 
 		try {
 			FileDialog dialog = new FileDialog(shell, SWT.SAVE);
@@ -1244,6 +1247,8 @@ public class MainWindow extends JFrame {
 	private void openFile() {
 		Display display = new Display();
 		Shell shell = new Shell(display);
+		Image imgIcon = new Image(display, "data/jumbo_cactuar.png");
+		shell.setImage(imgIcon);
 
 		try {
 			FileDialog dialog = new FileDialog(shell, SWT.OPEN);
