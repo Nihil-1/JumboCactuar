@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -79,7 +80,10 @@ public class MainWindow extends JFrame {
 
 	private final boolean DEBUG = false;
 
-	private static final long serialVersionUID = 1L;
+	private static final Preferences PREFS = Preferences.userNodeForPackage(MainWindow.class);
+	private static final String LAST_USED_DIR_KEY = "lastUsedDir";
+
+	private static final long serialVersionUID = 1010L;
 	private static final int ENCOUNTER_SIZE = 128;
 	private static final int ENCOUNTERS_COUNT = 1024;
 	private static final String TITLE = "Jumbo Cactuar - scene.out editor";
@@ -1161,7 +1165,9 @@ public class MainWindow extends JFrame {
 			dialog.setFilterExtensions(new String[] { "*.out" });
 			dialog.setFilterNames(new String[] { "FF8 .out Files (*.out)" });
 
-			// Suggest current file path if available
+			// Set default path
+			String lastUsedDir = PREFS.get(LAST_USED_DIR_KEY, System.getProperty("user.dir"));
+			dialog.setFilterPath(lastUsedDir);
 			dialog.setFileName(new File(currentFilePath).getName());
 
 			String selectedPath = dialog.open();
@@ -1181,7 +1187,8 @@ public class MainWindow extends JFrame {
 						return;
 					}
 				}
-
+				String selectedDir = fileToSave.getParent();
+				PREFS.put(LAST_USED_DIR_KEY, selectedDir);
 				writeFile(fileToSave);
 			}
 		} finally {
@@ -1268,13 +1275,17 @@ public class MainWindow extends JFrame {
 			dialog.setText("Open FF8 .out File");
 			dialog.setFilterExtensions(new String[] { "*.out" });
 			dialog.setFilterNames(new String[] { "FF8 .out Files (*.out)" });
-			dialog.setFilterPath(System.getProperty("user.dir"));
+
+			String lastUsedDir = PREFS.get(LAST_USED_DIR_KEY, System.getProperty("user.dir"));
+			dialog.setFilterPath(lastUsedDir);
 
 			String selectedPath = dialog.open();
 			if (selectedPath != null) {
 				File selectedFile = new File(selectedPath);
 
 				if (selectedFile.getName().toLowerCase().endsWith(".out")) {
+					String selectedDir = selectedFile.getParent();
+					PREFS.put(LAST_USED_DIR_KEY, selectedDir);
 					readSceneOut(selectedFile.getAbsolutePath());
 				} else {
 					JOptionPane.showMessageDialog(this, "Only .out files are supported.", "Invalid File", JOptionPane.WARNING_MESSAGE);
