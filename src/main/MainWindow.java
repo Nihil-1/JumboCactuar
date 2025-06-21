@@ -198,6 +198,18 @@ public class MainWindow extends JFrame {
 			}
 		});
 
+		// Detect Ctrl+Shift+S
+		inputMap.put(KeyStroke.getKeyStroke("control shift S"), "ctrlShiftSPressed");
+		actionMap.put("ctrlShiftSPressed", new AbstractAction() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				saveAs();
+			}
+		});
+
 		// Detect Ctrl+O
 		inputMap.put(KeyStroke.getKeyStroke("control O"), "ctrlOPressed");
 		actionMap.put("ctrlOPressed", new AbstractAction() {
@@ -1209,7 +1221,8 @@ public class MainWindow extends JFrame {
 				"</style></head><body>" + //
 				"<h3>Made by Nihil</h3>" + //
 				"CTRL+O: Open<br>" + //
-				"CTRL+S: Save As<br>" + //
+				"CTRL+S: Save<br>" + //
+				"CTRL+SHIFT+S: Save As...<br>" + //
 				"ESC: Exit<br><br>" + //
 				"You can drag and drop .out files to load them, either inside the program window<br>" + //
 				"or directly onto the .exe when starting the program.<br><br>" + //
