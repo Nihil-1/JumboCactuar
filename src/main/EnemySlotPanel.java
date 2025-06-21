@@ -150,6 +150,7 @@ public class EnemySlotPanel {
 
 		selectedChkBox = new JCheckBox("Enabled");
 		selectedChkBox.setName(" ");
+		selectedChkBox.setToolTipText("Select Slot for Copy/Paste");
 		selectedChkBox.setBounds(10, 200, 20, 23);
 		slotPanel.add(selectedChkBox);
 	}

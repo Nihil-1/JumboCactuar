@@ -47,7 +47,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
-import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -68,12 +67,12 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.DocumentFilter;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Shell;
 
 public class MainWindow extends JFrame {
 
@@ -85,9 +84,9 @@ public class MainWindow extends JFrame {
 	private static final String TITLE = "Jumbo Cactuar - scene.out editor";
 
 	private List<String> battleStageNames, enemyNames;
-	private Encounter[] encs;
+	private Encounter[] encs, encsBackup;
 	private boolean suppressComponentChangedEvents = false, fileChanged = false;
-	private String currentFile;
+	private String currentFilePath;
 	private Encounter copiedEnc = null;
 	private int copiedBattleStage;
 	private byte copiedBattleFlags;
@@ -115,6 +114,7 @@ public class MainWindow extends JFrame {
 	private JButton secCamPasteBtn;
 	private JButton secCamCopyBtn;
 	private JButton copySelectedEncountersBtn, pasteSelectedEncountersBtn;
+	private JButton revertToUnsavedBtn;
 
 	public static void main(String[] args) {
 		final File draggedAndDroppedFile;
@@ -193,7 +193,7 @@ public class MainWindow extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				saveAs();
+				save();
 			}
 		});
 
@@ -262,8 +262,11 @@ public class MainWindow extends JFrame {
 		JMenuItem openItem = new JMenuItem("Open");
 		fileMenu.add(openItem);
 
-		JMenuItem saveItem = new JMenuItem("Save As...");
+		JMenuItem saveItem = new JMenuItem("Save");
 		fileMenu.add(saveItem);
+
+		JMenuItem saveAsItem = new JMenuItem("Save As...");
+		fileMenu.add(saveAsItem);
 
 		JMenuItem exitItem = new JMenuItem("Exit");
 		fileMenu.add(exitItem);
@@ -278,7 +281,9 @@ public class MainWindow extends JFrame {
 		// Action Listeners
 		openItem.addActionListener(e -> openFile());
 
-		saveItem.addActionListener(e -> saveAs());
+		saveItem.addActionListener(e -> save());
+
+		saveAsItem.addActionListener(e -> saveAs());
 
 		exitItem.addActionListener(e -> tryToExit());
 
@@ -501,10 +506,7 @@ public class MainWindow extends JFrame {
 
 		// Unknowns
 		unknownsPanel = new UnknownsPanel(this);
-		((AbstractDocument) unknownsPanel.unknown1TxFld.getDocument()).setDocumentFilter(new HexByteFilter(16));
-		((AbstractDocument) unknownsPanel.unknown2TxFld.getDocument()).setDocumentFilter(new HexByteFilter(16));
-		((AbstractDocument) unknownsPanel.unknown3TxFld.getDocument()).setDocumentFilter(new HexByteFilter(16));
-		((AbstractDocument) unknownsPanel.unknown4TxFld.getDocument()).setDocumentFilter(new HexByteFilter(8));
+
 		unknownsPanel.setAllEnabled(false);
 		contentPane.add(unknownsPanel.panel);
 
@@ -596,6 +598,18 @@ public class MainWindow extends JFrame {
 		pasteSelectedEncountersBtn.setBounds(1420, 31, 162, 23);
 		contentPane.add(pasteSelectedEncountersBtn);
 
+		revertToUnsavedBtn = new JButton("Revert to Unsaved");
+		revertToUnsavedBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int encId = (int) encIdSpinner.getValue();
+				encs[encId] = new Encounter(encsBackup[encId]);
+				loadEncounter(encs[encId], true);
+			}
+		});
+		revertToUnsavedBtn.setEnabled(false);
+		revertToUnsavedBtn.setBounds(439, 31, 123, 23);
+		contentPane.add(revertToUnsavedBtn);
+
 		// Enemy slots
 		enemySlots = new ArrayList<>();
 		int totalSlots = 8;
@@ -632,16 +646,15 @@ public class MainWindow extends JFrame {
 		}
 		if (DEBUG) readSceneOut("data/scene.out");
 		if (draggedAndDroppedFilePath != null) {
-			currentFile = new File(draggedAndDroppedFilePath).getName();
+			currentFilePath = new File(draggedAndDroppedFilePath).getName();
 			fileChanged = false;
-			setTitle(TITLE + " | " + currentFile);
+			setTitle(TITLE + " | " + currentFilePath);
 			readSceneOut(draggedAndDroppedFilePath);
 		}
 	}
 
 	private void onComponentChanged(Component source) {
 		String sourceName = source.getName();
-		System.out.println(sourceName);
 		Encounter enc = encs[(int) encIdSpinner.getValue()];
 
 		if ("Encounter ID".equals(sourceName)) {
@@ -698,14 +711,14 @@ public class MainWindow extends JFrame {
 				enc.setPosition(i, enemySlots.get(i).getPosition());
 			}
 		} else if (sourceName.startsWith("Unknown")) {
-			int unk1Length = unknownsPanel.unknown1TxFld.getText().length();
-			int unk2Length = unknownsPanel.unknown2TxFld.getText().length();
-			int unk3Length = unknownsPanel.unknown3TxFld.getText().length();
-			int unk4Length = unknownsPanel.unknown4TxFld.getText().length();
+			int unk1Length = unknownsPanel.unknown0TxFld.getText().length();
+			int unk2Length = unknownsPanel.unknown1TxFld.getText().length();
+			int unk3Length = unknownsPanel.unknown2TxFld.getText().length();
+			int unk4Length = unknownsPanel.unknown3TxFld.getText().length();
 			if (unk1Length == 47 && unk2Length == 47 && unk3Length == 47 && unk4Length == 23) {
 				fileChanged = true;
-				String[] unknownValues = { unknownsPanel.unknown1TxFld.getText(), unknownsPanel.unknown2TxFld.getText(), unknownsPanel.unknown3TxFld.getText(),
-						unknownsPanel.unknown4TxFld.getText() };
+				String[] unknownValues = { unknownsPanel.unknown0TxFld.getText(), unknownsPanel.unknown1TxFld.getText(), unknownsPanel.unknown2TxFld.getText(),
+						unknownsPanel.unknown3TxFld.getText() };
 				List<Integer> intValues = new ArrayList<>();
 				for (String unknownVals : unknownValues) {
 					String[] hexBytes = unknownVals.trim().split(" ");
@@ -720,7 +733,7 @@ public class MainWindow extends JFrame {
 			}
 		}
 		if (fileChanged) {
-			setTitle(TITLE + " | *" + currentFile);
+			setTitle(TITLE + " | *" + currentFilePath);
 		}
 	}
 
@@ -764,26 +777,45 @@ public class MainWindow extends JFrame {
 	}
 
 	public void loadUnknowns(int[] unknowns) {
-		String unk1 = "";
+		StringBuilder raw = new StringBuilder();
 		for (int i = 0; i < 16; i++) {
-			unk1 += (unknowns[i] < 16) ? "0" + Integer.toHexString(unknowns[i]) : Integer.toHexString(unknowns[i]);
+			raw.append(String.format("%02X", unknowns[i]));
 		}
-		String unk2 = "";
+		String formatted = formatHexInput(raw.toString());
+		unknownsPanel.setUnknown0(formatted);
+
+		raw = new StringBuilder();
 		for (int i = 16; i < 32; i++) {
-			unk2 += (unknowns[i] < 16) ? "0" + Integer.toHexString(unknowns[i]) : Integer.toHexString(unknowns[i]);
+			raw.append(String.format("%02X", unknowns[i]));
 		}
-		String unk3 = "";
+		formatted = formatHexInput(raw.toString());
+		unknownsPanel.setUnknown1(formatted);
+
+		raw = new StringBuilder();
 		for (int i = 32; i < 48; i++) {
-			unk3 += (unknowns[i] < 16) ? "0" + Integer.toHexString(unknowns[i]) : Integer.toHexString(unknowns[i]);
+			raw.append(String.format("%02X", unknowns[i]));
 		}
-		String unk4 = "";
+		formatted = formatHexInput(raw.toString());
+		unknownsPanel.setUnknown2(formatted);
+
+		raw = new StringBuilder();
 		for (int i = 48; i < 56; i++) {
-			unk4 += (unknowns[i] < 16) ? "0" + Integer.toHexString(unknowns[i]) : Integer.toHexString(unknowns[i]);
+			raw.append(String.format("%02X", unknowns[i]));
 		}
-		unknownsPanel.setUnknown1(unk1);
-		unknownsPanel.setUnknown2(unk2);
-		unknownsPanel.setUnknown3(unk3);
-		unknownsPanel.setUnknown4(unk4);
+		formatted = formatHexInput(raw.toString());
+		unknownsPanel.setUnknown3(formatted);
+	}
+
+	private String formatHexInput(String input) {
+		input = input.replaceAll("[^0-9A-Fa-f]", "").toUpperCase();
+
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < input.length(); i += 2) {
+			if (i > 0) result.append(" ");
+			result.append(input.charAt(i));
+			if (i + 1 < input.length()) result.append(input.charAt(i + 1));
+		}
+		return result.toString();
 	}
 
 	private void loadEncounter(Encounter enc, boolean suppressEvents) {
@@ -813,12 +845,14 @@ public class MainWindow extends JFrame {
 			e.printStackTrace();
 		}
 		encs = new Encounter[ENCOUNTERS_COUNT];
+		encsBackup = new Encounter[ENCOUNTERS_COUNT];
 		for (int i = 0; i < ENCOUNTERS_COUNT; i++) {
 			byte[] encData = new byte[ENCOUNTER_SIZE];
 			try {
 				file.seek(i * ENCOUNTER_SIZE);
 				file.readFully(encData);
 				encs[i] = new Encounter(encData);
+				encsBackup[i] = new Encounter(encData);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -832,9 +866,9 @@ public class MainWindow extends JFrame {
 			b.setEnabled(true);
 		}
 
-		currentFile = fname;
+		currentFilePath = fname;
 		fileChanged = false;
-		setTitle(TITLE + " | " + currentFile);
+		setTitle(TITLE + " | " + currentFilePath);
 
 		// Encounter ID stuff
 		encIdLbl.setEnabled(true);
@@ -879,6 +913,9 @@ public class MainWindow extends JFrame {
 		secCamPasteBtn.setEnabled(true);
 		copySelectedEncountersBtn.setEnabled(true);
 		pasteSelectedEncountersBtn.setEnabled(true);
+
+		// Revert
+		revertToUnsavedBtn.setEnabled(true);
 
 		loadEncounter(encs[(int) encIdSpinner.getValue()], true);
 	}
@@ -1070,100 +1107,71 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	// DocumentFilter for hex editing fields
-	static class HexByteFilter extends DocumentFilter {
+	private void writeFile(File fileToSave) {
+		currentFilePath = fileToSave.getAbsolutePath();
+		byte[] dataToSave = new byte[ENCOUNTERS_COUNT * ENCOUNTER_SIZE];
+		int offset = 0; // To keep track of the current position in dataToSave
 
-		private int bytes, maxLength;
-
-		public HexByteFilter(int bytes) {
-			this.bytes = bytes;
-			maxLength = bytes * 2 + bytes - 1;
+		for (Encounter enc : encs) {
+			byte[] encounterBytes = enc.toBytes(); // Get the 128 bytes for the current encounter
+			System.arraycopy(encounterBytes, 0, dataToSave, offset, ENCOUNTER_SIZE);
+			offset += ENCOUNTER_SIZE; // Move the offset to the next available position
 		}
-
-		@Override
-		public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-			if (string == null) return;
-			replace(fb, offset, 0, string, attr);
-		}
-
-		@Override
-		public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-			Document doc = fb.getDocument();
-			StringBuilder sb = new StringBuilder(doc.getText(0, doc.getLength()));
-			sb.replace(offset, offset + length, text.toUpperCase());
-
-			String formatted = formatHexInput(sb.toString());
-
-			if (formatted != null && formatted.length() <= maxLength) {
-				fb.replace(0, doc.getLength(), formatted, attrs);
+		try (FileOutputStream out = new FileOutputStream(fileToSave)) {
+			out.write(dataToSave);
+			fileChanged = false;
+			setTitle(TITLE + " | " + currentFilePath);
+			for (int i = 0; i < encs.length; i++) {
+				encsBackup[i] = new Encounter(encs[i]);
 			}
-		}
-
-		private String formatHexInput(String input) {
-			input = input.replaceAll("[^0-9A-Fa-f]", ""); // Strip non-hex
-			input = input.toUpperCase();
-
-			if (input.length() > bytes * 2) return null; // A byte is 2 chars
-
-			StringBuilder result = new StringBuilder();
-			for (int i = 0; i < input.length(); i += 2) {
-				if (i > 0) result.append(" ");
-				result.append(input.charAt(i));
-				if (i + 1 < input.length()) result.append(input.charAt(i + 1));
-			}
-			return result.toString();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
+	private void save() {
+		if (currentFilePath == null) return;
+		writeFile(new File(currentFilePath));
+	}
+
 	private void saveAs() {
-		if (currentFile == null) return;
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setSelectedFile(new File(currentFile));
+		if (currentFilePath == null) return;
 
-		// Set the file selection mode to allow saving files (not directories)
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY); // Only allow selecting files for saving
+		Display display = new Display();
+		Shell shell = new Shell(display);
 
-		// Create and set a file filter for .out files
-		FileNameExtensionFilter outFilter = new FileNameExtensionFilter("FF8 .out Files (*.out)", "out");
-		fileChooser.addChoosableFileFilter(outFilter);
-		fileChooser.setFileFilter(outFilter); // Set as the default filter
+		try {
+			FileDialog dialog = new FileDialog(shell, SWT.SAVE);
+			dialog.setText("Save As");
+			dialog.setFilterExtensions(new String[] { "*.out" });
+			dialog.setFilterNames(new String[] { "FF8 .out Files (*.out)" });
 
-		int userSelection = fileChooser.showSaveDialog(this);
+			// Suggest current file path if available
+			dialog.setFileName(new File(currentFilePath).getName());
 
-		if (userSelection == JFileChooser.APPROVE_OPTION) {
-			File fileToSave = fileChooser.getSelectedFile();
-			String filePath = fileToSave.getAbsolutePath();
-
-			if (!filePath.toLowerCase().endsWith(".out")) {
-				filePath += ".out";
-				fileToSave = new File(filePath); // Update fileToSave with the new path
-			}
-
-			// Check if the file already exists and prompt the user
-			if (fileToSave.exists()) {
-				int confirmOverwrite = JOptionPane.showConfirmDialog(this, "File '" + fileToSave.getName() + "' already exists.\nDo you want to overwrite it?", "Confirm Overwrite",
-						JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-
-				if (confirmOverwrite == JOptionPane.NO_OPTION) {
-					System.out.println("Save operation cancelled by user (did not overwrite).");
-					return;
+			String selectedPath = dialog.open();
+			if (selectedPath != null) {
+				if (!selectedPath.toLowerCase().endsWith(".out")) {
+					selectedPath += ".out";
 				}
-			}
-			byte[] dataToSave = new byte[ENCOUNTERS_COUNT * ENCOUNTER_SIZE];
-			int offset = 0; // To keep track of the current position in dataToSave
 
-			for (Encounter enc : encs) {
-				byte[] encounterBytes = enc.toBytes(); // Get the 128 bytes for the current encounter
-				System.arraycopy(encounterBytes, 0, dataToSave, offset, ENCOUNTER_SIZE);
-				offset += ENCOUNTER_SIZE; // Move the offset to the next available position
+				File fileToSave = new File(selectedPath);
+
+				if (fileToSave.exists()) {
+					int confirmOverwrite = JOptionPane.showConfirmDialog(this, "File '" + fileToSave.getName() + "' already exists.\nDo you want to overwrite it?", "Confirm Overwrite",
+							JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+					if (confirmOverwrite == JOptionPane.NO_OPTION) {
+						System.out.println("Save operation cancelled by user (did not overwrite).");
+						return;
+					}
+				}
+
+				writeFile(fileToSave);
 			}
-			try (FileOutputStream out = new FileOutputStream(fileToSave)) {
-				out.write(dataToSave);
-				fileChanged = false;
-				setTitle(TITLE + " | " + currentFile);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		} finally {
+			shell.dispose();
+			display.dispose();
 		}
 	}
 
@@ -1230,32 +1238,33 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		// Show the JEditorPane in the JOptionPane
 		JOptionPane.showMessageDialog(this, editorPane, "About", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	private void openFile() {
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setSelectedFile(new File("scene.out"));
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		Display display = new Display();
+		Shell shell = new Shell(display);
 
-		FileNameExtensionFilter outFilter = new FileNameExtensionFilter("FF8 .out Files (*.out)", "out");
-		fileChooser.addChoosableFileFilter(outFilter);
-		fileChooser.setFileFilter(outFilter); // Set it as the default filter
+		try {
+			FileDialog dialog = new FileDialog(shell, SWT.OPEN);
+			dialog.setText("Open FF8 .out File");
+			dialog.setFilterExtensions(new String[] { "*.out" });
+			dialog.setFilterNames(new String[] { "FF8 .out Files (*.out)" });
+			dialog.setFilterPath(System.getProperty("user.dir"));
 
-		int userSelection = fileChooser.showOpenDialog(this); // Adjust this line based on 'this' context
+			String selectedPath = dialog.open();
+			if (selectedPath != null) {
+				File selectedFile = new File(selectedPath);
 
-		if (userSelection == JFileChooser.APPROVE_OPTION) {
-			File selectedFile = fileChooser.getSelectedFile();
-
-			// Check if the selected item is a directory or a file
-			if (selectedFile.isDirectory()) {
-				JOptionPane.showMessageDialog(null, "Please select an .out file, not a directory.", "Invalid Selection", JOptionPane.WARNING_MESSAGE);
-			} else if (selectedFile.getName().toLowerCase().endsWith(".out")) {
-				readSceneOut(selectedFile.getAbsolutePath());
-			} else {
-				JOptionPane.showMessageDialog(null, "Only .out files are supported.", "Invalid File", JOptionPane.WARNING_MESSAGE);
+				if (selectedFile.getName().toLowerCase().endsWith(".out")) {
+					readSceneOut(selectedFile.getAbsolutePath());
+				} else {
+					JOptionPane.showMessageDialog(this, "Only .out files are supported.", "Invalid File", JOptionPane.WARNING_MESSAGE);
+				}
 			}
+		} finally {
+			shell.dispose();
+			display.dispose();
 		}
 	}
 
@@ -1290,5 +1299,4 @@ public class MainWindow extends JFrame {
 	public void setCopiedEnemy(EnemyData copiedEnemy) {
 		this.copiedEnemy = copiedEnemy;
 	}
-
 }

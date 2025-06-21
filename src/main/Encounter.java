@@ -22,6 +22,30 @@ public class Encounter {
 	private int[] unknowns = new int[56];
 	private int[] levels = new int[8];
 
+	public Encounter(Encounter other) {
+		this.battleStage = other.battleStage;
+		this.battleFlags = other.battleFlags;
+		this.mainCamData = other.mainCamData;
+		this.mainCam = other.mainCam;
+		this.mainCamAnim = other.mainCamAnim;
+		this.secCamData = other.secCamData;
+		this.secCam = other.secCam;
+		this.secCamAnim = other.secCamAnim;
+		this.notVisFlags = other.notVisFlags;
+		this.notLoadedFlags = other.notLoadedFlags;
+		this.notTargFlags = other.notTargFlags;
+		this.enabledFlags = other.enabledFlags;
+
+		this.positions = new Position[8];
+		for (int i = 0; i < 8; i++) {
+			this.positions[i] = other.getPosition(i);
+		}
+
+		this.enemies = other.enemies.clone();
+		this.unknowns = other.unknowns.clone();
+		this.levels = other.levels.clone();
+	}
+
 	public Encounter(byte[] data) {
 		ByteBuffer buf = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
 		battleStage = buf.get(0x00) & 0xFF;
