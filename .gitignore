@@ -1,3 +1,10 @@
+# Exe compilation files
+jre/**
+config.xml
+jumbo_cactuar.ico
+*.exe
+!JumboCactuar_lib
+
 # Data files
 data/**
 !data/enemy_names.txt
@@ -24,13 +31,8 @@ data/**
 *.zip
 *.tar.gz
 *.rar
-
-# Exe compilation files
-jre/**
-config.xml
-jumbo_cactuar.ico
-*.exe
-!JumboCactuar_lib/*.jar
+*.manifest
+*.lnk
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*

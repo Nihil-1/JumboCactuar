@@ -118,8 +118,8 @@ public class MainWindow extends JFrame {
 	private JButton mainCamCopyBtn, mainCamPasteBtn, battleFlagsCopyBtn, battleFlagsPasteBtn, battleStageCopyBtn, battleStagePasteBtn;
 	private JButton secCamPasteBtn;
 	private JButton secCamCopyBtn;
-	private JButton copySelectedEncountersBtn, pasteSelectedEncountersBtn;
-	private JButton revertToUnsavedBtn;
+	private JButton copySelectedSlotsBtn, pasteSelectedSlotsBtn;
+	private JButton revertChangesBtn;
 
 	public static void main(String[] args) {
 		final File draggedAndDroppedFile;
@@ -572,8 +572,8 @@ public class MainWindow extends JFrame {
 		battleStagePasteBtn.setBounds(462, 87, 20, 20);
 		contentPane.add(battleStagePasteBtn);
 
-		copySelectedEncountersBtn = new JButton("Copy Selected Encounters");
-		copySelectedEncountersBtn.addActionListener(new ActionListener() {
+		copySelectedSlotsBtn = new JButton("Copy Selected Enemy Slots");
+		copySelectedSlotsBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				copiedEnemies = new ArrayList<>();
 				for (int i = 0; i < enemySlots.size(); i++) {
@@ -584,12 +584,12 @@ public class MainWindow extends JFrame {
 				}
 			}
 		});
-		copySelectedEncountersBtn.setEnabled(false);
-		copySelectedEncountersBtn.setBounds(1249, 31, 162, 23);
-		contentPane.add(copySelectedEncountersBtn);
+		copySelectedSlotsBtn.setEnabled(false);
+		copySelectedSlotsBtn.setBounds(1249, 31, 164, 23);
+		contentPane.add(copySelectedSlotsBtn);
 
-		pasteSelectedEncountersBtn = new JButton("Paste Selected Encounters");
-		pasteSelectedEncountersBtn.addActionListener(new ActionListener() {
+		pasteSelectedSlotsBtn = new JButton("Paste Selected Enemy Slots");
+		pasteSelectedSlotsBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				List<Integer> selectedSlots = new ArrayList<>();
 				for (int i = 0; i < enemySlots.size(); i++) {
@@ -611,21 +611,21 @@ public class MainWindow extends JFrame {
 				}
 			}
 		});
-		pasteSelectedEncountersBtn.setEnabled(false);
-		pasteSelectedEncountersBtn.setBounds(1420, 31, 162, 23);
-		contentPane.add(pasteSelectedEncountersBtn);
+		pasteSelectedSlotsBtn.setEnabled(false);
+		pasteSelectedSlotsBtn.setBounds(1418, 31, 164, 23);
+		contentPane.add(pasteSelectedSlotsBtn);
 
-		revertToUnsavedBtn = new JButton("Revert to Unsaved");
-		revertToUnsavedBtn.addActionListener(new ActionListener() {
+		revertChangesBtn = new JButton("Revert this Encounter's changes");
+		revertChangesBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int encId = (int) encIdSpinner.getValue();
 				encs[encId] = new Encounter(encsBackup[encId]);
 				loadEncounter(encs[encId], true);
 			}
 		});
-		revertToUnsavedBtn.setEnabled(false);
-		revertToUnsavedBtn.setBounds(439, 31, 123, 23);
-		contentPane.add(revertToUnsavedBtn);
+		revertChangesBtn.setEnabled(false);
+		revertChangesBtn.setBounds(439, 31, 187, 23);
+		contentPane.add(revertChangesBtn);
 
 		// Enemy slots
 		enemySlots = new ArrayList<>();
@@ -928,11 +928,11 @@ public class MainWindow extends JFrame {
 		mainCamPasteBtn.setEnabled(true);
 		secCamCopyBtn.setEnabled(true);
 		secCamPasteBtn.setEnabled(true);
-		copySelectedEncountersBtn.setEnabled(true);
-		pasteSelectedEncountersBtn.setEnabled(true);
+		copySelectedSlotsBtn.setEnabled(true);
+		pasteSelectedSlotsBtn.setEnabled(true);
 
 		// Revert
-		revertToUnsavedBtn.setEnabled(true);
+		revertChangesBtn.setEnabled(true);
 
 		loadEncounter(encs[(int) encIdSpinner.getValue()], true);
 	}
