@@ -158,6 +158,6 @@ Balamb Garden (External Corridor?)
 Generic Landscape?
 Generic Landscape?
 Generic Landscape?
-Test Environment? (UV tile texture)
+Test Environment (UV tile texture) (Unused)
 Generic Landscape?
 Generic Landscape?
