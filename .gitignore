@@ -1,5 +1,6 @@
 # Exe compilation files
 jre/**
+JumboCactuar_lib/**
 config.xml
 jumbo_cactuar.ico
 *.exe
