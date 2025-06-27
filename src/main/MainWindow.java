@@ -668,7 +668,6 @@ public class MainWindow extends JFrame {
 			setTitle(TITLE + " | " + currentFilePath);
 			readSceneOut(draggedAndDroppedFilePath);
 		}
-		writeAllEnemiesAndTheirUnks(encs, "data/encsandunks.txt");
 	}
 
 	private void onComponentChanged(Component source) {
@@ -998,7 +997,7 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	private void writeAllEnemiesAndTheirUnks(Encounter[] encs, String filename) {
+	public void writeAllEnemiesAndTheirUnks(Encounter[] encs, String filename) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
 			for (int encId = 0; encId < encs.length; encId++) {
 				Encounter enc = encs[encId];
