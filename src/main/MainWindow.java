@@ -353,7 +353,7 @@ public class MainWindow extends JFrame {
 		int checkboxWidth = 160; // Wide enough for longest label
 
 		for (int i = 0; i < battleFlagLabels.length; i++) {
-			battleFlagsChkBoxArr[i] = new JCheckBox(battleFlagLabels[i]);
+			battleFlagsChkBoxArr[i] = new JCheckBox(battleFlagLabels[7 - i]);
 			battleFlagsChkBoxArr[i].setName("Battle Flags " + i);
 			battleFlagsChkBoxArr[i].setEnabled(false);
 			battleFlagsChkBoxArr[i].setBounds(checkboxX, checkboxYStart + (i * checkboxHeight), (i == 7) ? 100 : checkboxWidth, 23);
@@ -668,6 +668,7 @@ public class MainWindow extends JFrame {
 			setTitle(TITLE + " | " + currentFilePath);
 			readSceneOut(draggedAndDroppedFilePath);
 		}
+		writeAllEnemiesAndTheirUnks(encs, "data/encsandunks.txt");
 	}
 
 	private void onComponentChanged(Component source) {
@@ -992,6 +993,39 @@ public class MainWindow extends JFrame {
 				writer.newLine();
 			}
 			System.out.println("Cams successfully written to " + filename);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void writeAllEnemiesAndTheirUnks(Encounter[] encs, String filename) {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+			for (int encId = 0; encId < encs.length; encId++) {
+				Encounter enc = encs[encId];
+
+				writer.write("\nEncounter ID " + encId + ":\n");
+				for (int i = 0; i < 8; i++) {
+					int enemy = enc.getEnemy(i);
+					// if (enemy == 0) break;
+					int[] unknowns = enc.getUnknowns();
+					int unk0a = unknowns[i * 2];
+					int unk0b = unknowns[i * 2 + 1];
+
+					int unk1a = unknowns[16 + i * 2];
+					int unk1b = unknowns[16 + i * 2 + 1];
+
+					int unk2a = unknowns[32 + i * 2];
+					int unk2b = unknowns[32 + i * 2 + 1];
+
+					int unk3 = unknowns[48 + i];
+					writer.write("Enemy: " + enemyNames.get(enemy) + "(" + enemy + ")");
+					writer.write(String.format(" 0: %02X %02X", unk0a, unk0b));
+					writer.write(String.format(" 1: %02X %02X", unk1a, unk1b));
+					writer.write(String.format(" 2: %02X %02X", unk2a, unk2b));
+					writer.write(String.format(" 3: %02X%n", unk3));
+				}
+			}
+			System.out.println("Encounters and Unks successfully written to " + filename);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

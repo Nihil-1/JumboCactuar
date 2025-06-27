@@ -24,7 +24,7 @@ Gesper
 Creeps
 Hexadragon
 Blood Soul
-Elastoi
+Elastoid
 Armadodo
 Bite Bug
 Jelleye
@@ -120,7 +120,7 @@ UFO? (Breakable)
 Fujin
 Raijin
 Ultimecia (1st Phase)
-Griever
+Griever (Final Boss)
 Ultimecia (Junct. w/ Griever) (Ball form)
 Ultimecia (Junct. w/ Griever)
 Helix
