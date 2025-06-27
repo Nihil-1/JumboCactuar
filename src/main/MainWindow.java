@@ -1,8 +1,10 @@
 package main;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -18,6 +20,8 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -32,6 +36,7 @@ import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -56,10 +61,13 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -77,6 +85,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
 public class MainWindow extends JFrame {
+
+	// WARNING: Ugly and lazy code ahead
 
 	private final boolean DEBUG = false;
 
@@ -120,6 +130,15 @@ public class MainWindow extends JFrame {
 	private JButton secCamCopyBtn;
 	private JButton copySelectedSlotsBtn, pasteSelectedSlotsBtn;
 	private JButton revertChangesBtn;
+
+	private JLabel battleStageImgLbl;
+
+	private final Map<Integer, ImageIcon> thumbnailCache = new HashMap<>();
+	private final Map<Integer, ImageIcon> fullImageCache = new HashMap<>();
+	private ImageIcon fullSizeBattleStageIcon = null;
+	private int lastLoadedBattleStageImg = -1;
+
+	private final int BATTLE_STAGE_COUNT = 163; // or whatever your max is
 
 	public static void main(String[] args) {
 		final File draggedAndDroppedFile;
@@ -258,7 +277,7 @@ public class MainWindow extends JFrame {
 		});
 
 		setResizable(false);
-		setSize(1610, 796);
+		setSize(1610, 796 + 74);
 		setLocationRelativeTo(null);
 		setTitle(TITLE);
 		ImageIcon imgIcon = new ImageIcon("data/jumbo_cactuar.png");
@@ -338,7 +357,7 @@ public class MainWindow extends JFrame {
 		JPanel battleFlagsPanel = new JPanel();
 		battleFlagsPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Battle Flags", TitledBorder.LEADING,
 				TitledBorder.TOP, null, new Color(0, 0, 0)));
-		battleFlagsPanel.setBounds(10, 130, 183, 231);
+		battleFlagsPanel.setBounds(10, 130 + 74, 183, 231);
 		contentPane.add(battleFlagsPanel);
 		battleFlagsPanel.setLayout(null);
 
@@ -359,22 +378,6 @@ public class MainWindow extends JFrame {
 			battleFlagsChkBoxArr[i].setBounds(checkboxX, checkboxYStart + (i * checkboxHeight), (i == 7) ? 100 : checkboxWidth, 23);
 			battleFlagsPanel.add(battleFlagsChkBoxArr[i]);
 		}
-
-		battleStageLbl = new JLabel("Battle Stage:");
-		battleStageLbl.setEnabled(false);
-		battleStageLbl.setBounds(10, 90, 66, 14);
-		contentPane.add(battleStageLbl);
-
-		battleStageComboBox = new JComboBox<>();
-		battleStageComboBox.setName("Battle Stage");
-		battleStageComboBox.setEnabled(false);
-		battleStageComboBox.setBounds(79, 86, 350, 22);
-
-		for (String s : battleStageNames) {
-			battleStageComboBox.addItem(s);
-		}
-		enableComboBoxMouseWheel(battleStageComboBox);
-		contentPane.add(battleStageComboBox);
 
 		battleFlagsPasteBtn = new JButton("P");
 		battleFlagsPasteBtn.addActionListener(new ActionListener() {
@@ -400,11 +403,112 @@ public class MainWindow extends JFrame {
 		battleFlagsCopyBtn.setBounds(130, 200, 20, 20);
 		battleFlagsPanel.add(battleFlagsCopyBtn);
 
+		// Battle Stage
+		JPanel battleStagePanel = new JPanel();
+		battleStagePanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Battle Stage", TitledBorder.LEADING,
+				TitledBorder.TOP, null, new Color(0, 0, 0)));
+		battleStagePanel.setBounds(10, 65, 662, 130);
+		battleStagePanel.setLayout(null);
+		contentPane.add(battleStagePanel);
+
+		battleStageLbl = new JLabel("Battle Stage ID:");
+		battleStageLbl.setEnabled(false);
+		battleStageLbl.setBounds(10, 21, 80, 14);
+		battleStagePanel.add(battleStageLbl);
+
+		battleStageComboBox = new JComboBox<>();
+		battleStageComboBox.setName("Battle Stage");
+		battleStageComboBox.setEnabled(false);
+		battleStageComboBox.setBounds(100, 17, 350, 22);
+
+		for (String s : battleStageNames) {
+			battleStageComboBox.addItem(s);
+		}
+		enableComboBoxMouseWheel(battleStageComboBox);
+		battleStagePanel.add(battleStageComboBox);
+
+		battleStageCopyBtn = new JButton("C");
+		battleStageCopyBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				copiedBattleStage = encs[(int) encIdSpinner.getValue()].getBattleStage();
+			}
+		});
+		battleStageCopyBtn.setMargin(new Insets(0, 0, 0, 0));
+		battleStageCopyBtn.setFont(new Font("Tahoma", Font.PLAIN, 9));
+		battleStageCopyBtn.setEnabled(false);
+		battleStageCopyBtn.setBounds(407, 45, 20, 20);
+		battleStagePanel.add(battleStageCopyBtn);
+
+		battleStagePasteBtn = new JButton("P");
+		battleStagePasteBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				loadBattleStage(copiedBattleStage);
+			}
+		});
+		battleStagePasteBtn.setMargin(new Insets(0, 0, 0, 0));
+		battleStagePasteBtn.setFont(new Font("Tahoma", Font.PLAIN, 9));
+		battleStagePasteBtn.setEnabled(false);
+		battleStagePasteBtn.setBounds(430, 45, 20, 20);
+		battleStagePanel.add(battleStagePasteBtn);
+
+		// Create JLabel for thumbnail
+		battleStageImgLbl = new JLabel();
+		battleStageImgLbl.setBounds(461, 17, 187, 187 / 16 * 9);
+		battleStageImgLbl.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		battleStagePanel.add(battleStageImgLbl);
+		battleStageImgLbl.setEnabled(false);
+
+		// Add mouse listener
+		battleStageImgLbl.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int id = battleStageComboBox.getSelectedIndex();
+				String idStr = String.format("%03d", id);
+
+				ImageIcon fullIcon = fullImageCache.get(id);
+				if (fullIcon == null) {
+					fullIcon = new ImageIcon("bs/" + idStr + ".png");
+					fullImageCache.put(id, fullIcon);
+				}
+				fullSizeBattleStageIcon = fullIcon;
+
+				JFrame fullFrame = new JFrame((String) battleStageComboBox.getSelectedItem());
+				fullFrame.setIconImage(imgIcon.getImage());
+				fullFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+				fullFrame.getContentPane().setLayout(new BorderLayout());
+				fullFrame.setResizable(false);
+
+				JLabel fullImageLabel = new JLabel(fullSizeBattleStageIcon);
+				JScrollPane scrollPane = new JScrollPane(fullImageLabel);
+
+				fullFrame.getContentPane().add(scrollPane, BorderLayout.CENTER);
+				fullFrame.pack();
+				fullFrame.setLocationRelativeTo(null);
+				fullFrame.setVisible(true);
+
+				InputMap inputMap = fullFrame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+				ActionMap actionMap = fullFrame.getRootPane().getActionMap();
+
+				// Detect Esc key
+				inputMap.put(KeyStroke.getKeyStroke("ESCAPE"), "escapePressed");
+				actionMap.put("escapePressed", new AbstractAction() {
+
+					private static final long serialVersionUID = -25779636417376333L;
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						fullFrame.dispose();
+					}
+				});
+
+			}
+		});
+
 		// Cameras
 		JPanel mainCamPanel = new JPanel();
 		mainCamPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Main Camera", TitledBorder.LEADING, TitledBorder.TOP,
 				null, new Color(0, 0, 0)));
-		mainCamPanel.setBounds(10, 372, 183, 110);
+		mainCamPanel.setBounds(10, 372 + 74, 183, 110);
 		contentPane.add(mainCamPanel);
 		mainCamPanel.setLayout(null);
 
@@ -465,7 +569,7 @@ public class MainWindow extends JFrame {
 		secCamPanel.setLayout(null);
 		secCamPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Secondary Camera", TitledBorder.LEADING,
 				TitledBorder.TOP, null, new Color(0, 0, 0)));
-		secCamPanel.setBounds(10, 493, 183, 110);
+		secCamPanel.setBounds(10, 493 + 74, 183, 110);
 		contentPane.add(secCamPanel);
 
 		secCamIdLbl = new JLabel("Camera ID:");
@@ -548,30 +652,6 @@ public class MainWindow extends JFrame {
 		pasteEncounterBtn.setBounds(318, 31, 111, 23);
 		contentPane.add(pasteEncounterBtn);
 
-		battleStageCopyBtn = new JButton("C");
-		battleStageCopyBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				copiedBattleStage = encs[(int) encIdSpinner.getValue()].getBattleStage();
-			}
-		});
-		battleStageCopyBtn.setMargin(new Insets(0, 0, 0, 0));
-		battleStageCopyBtn.setFont(new Font("Tahoma", Font.PLAIN, 9));
-		battleStageCopyBtn.setEnabled(false);
-		battleStageCopyBtn.setBounds(439, 87, 20, 20);
-		contentPane.add(battleStageCopyBtn);
-
-		battleStagePasteBtn = new JButton("P");
-		battleStagePasteBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				loadBattleStage(copiedBattleStage);
-			}
-		});
-		battleStagePasteBtn.setMargin(new Insets(0, 0, 0, 0));
-		battleStagePasteBtn.setFont(new Font("Tahoma", Font.PLAIN, 9));
-		battleStagePasteBtn.setEnabled(false);
-		battleStagePasteBtn.setBounds(462, 87, 20, 20);
-		contentPane.add(battleStagePasteBtn);
-
 		copySelectedSlotsBtn = new JButton("Copy Selected Enemy Slots");
 		copySelectedSlotsBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -631,7 +711,7 @@ public class MainWindow extends JFrame {
 		enemySlots = new ArrayList<>();
 		int totalSlots = 8;
 		int startX = 203;
-		int startY = 130;
+		int startY = 130 + 74;
 		int xSpacing = 348;
 		int ySpacing = 242;
 
@@ -661,6 +741,9 @@ public class MainWindow extends JFrame {
 
 			registerAllListeners(contentPane);
 		}
+
+		preloadThumbnails();
+
 		if (DEBUG) readSceneOut("data/scene.out");
 		if (draggedAndDroppedFilePath != null) {
 			currentFilePath = new File(draggedAndDroppedFilePath).getName();
@@ -670,8 +753,26 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	private void onComponentChanged(Component source) {
-		String sourceName = source.getName();
+	private Component lastChangedComponent;
+	private Timer debounceTimer;
+
+	private void onComponentChanged(Component comp) {
+		if (suppressComponentChangedEvents) return;
+
+		lastChangedComponent = comp;
+		if (debounceTimer != null && debounceTimer.isRunning()) {
+			debounceTimer.restart();
+		} else {
+			debounceTimer = new Timer(20, e -> {
+				handleComponentChange(lastChangedComponent);
+			});
+			debounceTimer.setRepeats(false);
+			debounceTimer.start();
+		}
+	}
+
+	private void handleComponentChange(Component comp) {
+		String sourceName = comp.getName();
 		Encounter enc = encs[(int) encIdSpinner.getValue()];
 
 		if ("Encounter ID".equals(sourceName)) {
@@ -679,6 +780,7 @@ public class MainWindow extends JFrame {
 		} else if ("Battle Stage".equals(sourceName)) {
 			fileChanged = true;
 			enc.setBattleStage(battleStageComboBox.getSelectedIndex());
+			loadBattleStageImage();
 		} else if ("Main Camera ID".equals(sourceName)) {
 			fileChanged = true;
 			enc.setMainCam((int) mainCamIdSpinner.getValue());
@@ -754,87 +856,6 @@ public class MainWindow extends JFrame {
 		}
 	}
 
-	private void loadBattleFlags(byte battleFlags) {
-		for (int i = 0; i < battleFlagsChkBoxArr.length; i++) {
-			int mask = 1 << (7 - i); // Automatically calculate: 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01
-			battleFlagsChkBoxArr[i].setSelected((battleFlags & mask) != 0);
-		}
-	}
-
-	private void loadBattleStage(int battleStage) {
-		battleStageComboBox.setSelectedIndex(battleStage);
-	}
-
-	private void loadMainCamera(int camId, int camAnim) {
-		mainCamIdSpinner.setValue(camId);
-		mainCamAnimSpinner.setValue(camAnim);
-	}
-
-	private void loadSecondaryCamera(int camId, int camAnim) {
-		secCamIdSpinner.setValue(camId);
-		secCamAnimSpinner.setValue(camAnim);
-	}
-
-	public void loadEnemy(int index, EnemyData enemyData) {
-		EnemySlotPanel slot = enemySlots.get(index);
-
-		// Set enemy ID and Level
-		slot.setEnemyId(enemyData.getId());
-		slot.setLevel(enemyData.getLevel());
-
-		// Set flags
-		slot.setEnabledFlag(enemyData.isEnabled());
-		slot.setNotTargetableFlag(enemyData.isNotTargetable());
-		slot.setNotVisibleFlag(enemyData.isNotVisible());
-		slot.setNotLoadedFlag(enemyData.isNotLoaded());
-
-		// Set position
-		slot.setPosition(enemyData.getPosition().getX(), enemyData.getPosition().getY(), enemyData.getPosition().getZ());
-
-	}
-
-	public void loadUnknowns(int[] unknowns) {
-		StringBuilder raw = new StringBuilder();
-		for (int i = 0; i < 16; i++) {
-			raw.append(String.format("%02X", unknowns[i]));
-		}
-		String formatted = formatHexInput(raw.toString());
-		unknownsPanel.setUnknown0(formatted);
-
-		raw = new StringBuilder();
-		for (int i = 16; i < 32; i++) {
-			raw.append(String.format("%02X", unknowns[i]));
-		}
-		formatted = formatHexInput(raw.toString());
-		unknownsPanel.setUnknown1(formatted);
-
-		raw = new StringBuilder();
-		for (int i = 32; i < 48; i++) {
-			raw.append(String.format("%02X", unknowns[i]));
-		}
-		formatted = formatHexInput(raw.toString());
-		unknownsPanel.setUnknown2(formatted);
-
-		raw = new StringBuilder();
-		for (int i = 48; i < 56; i++) {
-			raw.append(String.format("%02X", unknowns[i]));
-		}
-		formatted = formatHexInput(raw.toString());
-		unknownsPanel.setUnknown3(formatted);
-	}
-
-	private String formatHexInput(String input) {
-		input = input.replaceAll("[^0-9A-Fa-f]", "").toUpperCase();
-
-		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < input.length(); i += 2) {
-			if (i > 0) result.append(" ");
-			result.append(input.charAt(i));
-			if (i + 1 < input.length()) result.append(input.charAt(i + 1));
-		}
-		return result.toString();
-	}
-
 	private void loadEncounter(Encounter enc, boolean suppressEvents) {
 		suppressComponentChangedEvents = suppressEvents;
 
@@ -852,6 +873,7 @@ public class MainWindow extends JFrame {
 		loadUnknowns(enc.getUnknowns());
 
 		suppressComponentChangedEvents = false;
+		loadBattleStageImage();
 	}
 
 	private void readSceneOut(String fname) {
@@ -895,6 +917,8 @@ public class MainWindow extends JFrame {
 		// Battle Stage stuff
 		battleStageLbl.setEnabled(true);
 		battleStageComboBox.setEnabled(true);
+		battleStageImgLbl.setEnabled(true);
+		loadBattleStageImage();
 
 		// Camera stuff
 		mainCamIdLbl.setEnabled(true);
@@ -1108,34 +1132,16 @@ public class MainWindow extends JFrame {
 
 	private void registerAllListeners(Container container) {
 		for (Component comp : container.getComponents()) {
-			if (comp instanceof JCheckBox) {
-				JCheckBox cb = (JCheckBox) comp;
-				cb.addItemListener(e -> {
-					if (!suppressComponentChangedEvents) {
-						onComponentChanged(cb);
-					}
-				});
-			} else if (comp instanceof JComboBox) {
-				JComboBox<?> combo = (JComboBox<?>) comp;
-				combo.addActionListener(e -> {
-					if (!suppressComponentChangedEvents) {
-						onComponentChanged(combo);
-					}
-				});
-			} else if (comp instanceof JSpinner) {
-				JSpinner spinner = (JSpinner) comp;
-				spinner.addChangeListener(e -> {
-					if (!suppressComponentChangedEvents) {
-						onComponentChanged(spinner);
-					}
-				});
-			} else if (comp instanceof JTextField) {
-				JTextField text = (JTextField) comp;
+			if (comp instanceof JCheckBox cb) {
+				cb.addItemListener(e -> onComponentChanged(cb));
+			} else if (comp instanceof JComboBox<?> combo) {
+				combo.addActionListener(e -> onComponentChanged(combo));
+			} else if (comp instanceof JSpinner spinner) {
+				spinner.addChangeListener(e -> onComponentChanged(spinner));
+			} else if (comp instanceof JTextField text) {
 				((AbstractDocument) text.getDocument()).addDocumentListener(new DocumentListener() {
 					private void handle() {
-						if (!suppressComponentChangedEvents) {
-							onComponentChanged(text);
-						}
+						onComponentChanged(text);
 					}
 
 					public void insertUpdate(DocumentEvent e) {
@@ -1150,8 +1156,7 @@ public class MainWindow extends JFrame {
 						handle();
 					}
 				});
-			} else if (comp instanceof Container) {
-				Container childContainer = (Container) comp;
+			} else if (comp instanceof Container childContainer) {
 				registerAllListeners(childContainer); // Recurse into nested panels
 			}
 		}
@@ -1266,10 +1271,11 @@ public class MainWindow extends JFrame {
 				"ESC: Exit<br><br>" + //
 				"You can drag and drop .out files to load them, either inside the program window<br>" + //
 				"or directly onto the .exe when starting the program.<br><br>" + //
-				"You can click the C buttons to copy parts of encounter data,<br>" + "then click the P buttons to paste them into another encounter,<br>"
-				+ "or, in the case of Enemy Slots, you can also paste within the same encounter.<br><br>" + //
+				"You can click the C buttons to copy parts of encounter data,<br>" + "then click the P buttons to paste them into another encounter,<br>" + //
+				"or, in the case of Enemy Slots, you can also paste within the same encounter.<br><br>" + //
 				"<a href=\"https://hobbitdur.github.io/FF8ModdingWiki/technical-reference/battle/encounter-codes/\">Encounters list</a><br>" + //
-				"<a href=\"https://hobbitdur.github.io/FF8ModdingWiki/technical-reference/battle/battle-structure-sceneout/\">Info on scene.out's format</a>" + //
+				"<a href=\"https://hobbitdur.github.io/FF8ModdingWiki/technical-reference/battle/battle-structure-sceneout/\">Info on scene.out's format</a><br><br>" + //
+				"Special thanks to <a href=\"https://github.com/MaKiPL/\">Maki</a> for the battle stage pictures!" + //
 				"</body></html>";//
 		editorPane.setText(htmlMessage);
 
@@ -1328,6 +1334,128 @@ public class MainWindow extends JFrame {
 			shell.dispose();
 			display.dispose();
 		}
+	}
+
+	private void loadBattleFlags(byte battleFlags) {
+		for (int i = 0; i < battleFlagsChkBoxArr.length; i++) {
+			int mask = 1 << (7 - i); // Automatically calculate: 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01
+			battleFlagsChkBoxArr[i].setSelected((battleFlags & mask) != 0);
+		}
+	}
+
+	private void loadBattleStage(int battleStage) {
+		battleStageComboBox.setSelectedIndex(battleStage);
+	}
+
+	private void loadMainCamera(int camId, int camAnim) {
+		mainCamIdSpinner.setValue(camId);
+		mainCamAnimSpinner.setValue(camAnim);
+	}
+
+	private void loadSecondaryCamera(int camId, int camAnim) {
+		secCamIdSpinner.setValue(camId);
+		secCamAnimSpinner.setValue(camAnim);
+	}
+
+	public void loadEnemy(int index, EnemyData enemyData) {
+		EnemySlotPanel slot = enemySlots.get(index);
+
+		// Set enemy ID and Level
+		slot.setEnemyId(enemyData.getId());
+		slot.setLevel(enemyData.getLevel());
+
+		// Set flags
+		slot.setEnabledFlag(enemyData.isEnabled());
+		slot.setNotTargetableFlag(enemyData.isNotTargetable());
+		slot.setNotVisibleFlag(enemyData.isNotVisible());
+		slot.setNotLoadedFlag(enemyData.isNotLoaded());
+
+		// Set position
+		slot.setPosition(enemyData.getPosition().getX(), enemyData.getPosition().getY(), enemyData.getPosition().getZ());
+
+	}
+
+	public void loadUnknowns(int[] unknowns) {
+		StringBuilder raw = new StringBuilder();
+		for (int i = 0; i < 16; i++) {
+			raw.append(String.format("%02X", unknowns[i]));
+		}
+		String formatted = formatHexInput(raw.toString());
+		unknownsPanel.setUnknown0(formatted);
+
+		raw = new StringBuilder();
+		for (int i = 16; i < 32; i++) {
+			raw.append(String.format("%02X", unknowns[i]));
+		}
+		formatted = formatHexInput(raw.toString());
+		unknownsPanel.setUnknown1(formatted);
+
+		raw = new StringBuilder();
+		for (int i = 32; i < 48; i++) {
+			raw.append(String.format("%02X", unknowns[i]));
+		}
+		formatted = formatHexInput(raw.toString());
+		unknownsPanel.setUnknown2(formatted);
+
+		raw = new StringBuilder();
+		for (int i = 48; i < 56; i++) {
+			raw.append(String.format("%02X", unknowns[i]));
+		}
+		formatted = formatHexInput(raw.toString());
+		unknownsPanel.setUnknown3(formatted);
+	}
+
+	private String formatHexInput(String input) {
+		input = input.replaceAll("[^0-9A-Fa-f]", "").toUpperCase();
+
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < input.length(); i += 2) {
+			if (i > 0) result.append(" ");
+			result.append(input.charAt(i));
+			if (i + 1 < input.length()) result.append(input.charAt(i + 1));
+		}
+		return result.toString();
+	}
+
+	private void loadBattleStageImage() {
+		int id = battleStageComboBox.getSelectedIndex();
+		if (id == lastLoadedBattleStageImg) return;
+
+		ImageIcon thumbIcon = thumbnailCache.get(id);
+		if (thumbIcon != null) {
+			battleStageImgLbl.setIcon(thumbIcon);
+		} else {
+			// fallback if not loaded yet
+			String idStr = String.format("%03d", id);
+			ImageIcon fallback = new ImageIcon("bs/" + idStr + ".png");
+			java.awt.Image scaled = fallback.getImage().getScaledInstance(187, -1, java.awt.Image.SCALE_SMOOTH);
+			thumbIcon = new ImageIcon(scaled);
+			thumbnailCache.put(id, thumbIcon);
+			battleStageImgLbl.setIcon(thumbIcon);
+		}
+		lastLoadedBattleStageImg = id;
+	}
+
+	private void preloadThumbnails() {
+		SwingWorker<Void, Void> worker = new SwingWorker<>() {
+			@Override
+			protected Void doInBackground() {
+				for (int id = 0; id < BATTLE_STAGE_COUNT; id++) {
+					if (!thumbnailCache.containsKey(id)) {
+						String idStr = String.format("%03d", id);
+						File file = new File("bs/" + idStr + ".png");
+						if (file.exists()) {
+							ImageIcon fullIcon = new ImageIcon(file.getAbsolutePath());
+							java.awt.Image scaledImage = fullIcon.getImage().getScaledInstance(187, -1, java.awt.Image.SCALE_SMOOTH);
+							ImageIcon thumbIcon = new ImageIcon(scaledImage);
+							thumbnailCache.put(id, thumbIcon);
+						}
+					}
+				}
+				return null;
+			}
+		};
+		worker.execute();
 	}
 
 	public Encounter getCopiedEnc() {

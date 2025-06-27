@@ -8,21 +8,21 @@ Dollet City
 Balamb Garden entrance gate
 Balamb Garden 1st Floor Hall
 Balamb Garden 2nd Floor Corridor
-Balamb Garden(Flyng Form) Quad
+Balamb Garden Damaged Quad
 Balamb Garden Outer Corridor
-Balamb Garden Training Center (elevator zone)
-Balamb Garden Norg's Floor
-Balamb Garden Underground Levels (Tube)
-Balamb Garden Underground levels (falling ladder zone?)
-Balamb Garden Underground levels (OilBoil Zone?)
+Balamb Garden Training Center (Elevator zone)
+Balamb Garden Master Room
+Balamb Garden MD Level (Tube)
+Balamb Garden MD Level (Falling ladder zone)
+Balamb Garden MD Level (Oilboyle Zone)
 Timber Pub Area
-Timber Maniacs square
+Timber Maniacs Square
 Train (Deling Presidential Vagon)
 Deling City Sewers
-Deling City (Caraway Residence secret exit path?)
+Deling City (Caraway Residence Secret Passage)
 Balamb Garden Class Room
-Galbadia Garden Corridor ?
-Galbadia Garden Corridor 2 ?
+Galbadia Garden Corridor with Stairs
+Galbadia Garden curved Corridor
 Galbadia Missile Base
 Deep Sea Research Center (Bahamut Fight)
 Balamb Town (Balamb Hotel Road)
@@ -35,69 +35,69 @@ Galbadia Garden Auditorium (Seifer Fight)
 Galbadia Garden Auditorium 2 (Edea Fight)
 Galbadia Garden Corridor
 Galbadia Garden (Ice Hockey Field)
-Ultimecia Junct. w/ Griever Arena
+Griever Fight Arena
 Final Ultimecia Space
-Desert Prison? (Elevator?)
-Desert Prison? (Floor?)
-Esthar City (Road)
+Desert Prison (Elevator)
+Desert Prison (Floor)
+Esthar City (Curved Blue Road, Red Sky)
 Desert Prison (Top)
-Esthar City (road2 ?)
-Missile Base? Hangar?
-Missile Base? Hangar2?
-Missile Base? Control room?
+Esthar City (Straight Blue Road, Blue Sky)
+Missile Base
+Missile Base Outside Area
+Missile Base Control room
 Winhill Village main square
-Tomb of the Unknown King (Corridor)?
-Esthar City (road 3 ?)
-Tomb of the Unknown King (Boss Fight room)?
+Tomb of the Unknown King (Corridor)
+Esthar City (Straight Blue Road, Red Sky)
+Tomb of the Unknown King (Boss Fight room)
 Fisherman Horizon (Road)
 Fisherman Horizon (Train Station Square)
-Desert Prison? (Floor?)
+Desert Prison (Elevator 2)
 Great Salt Lake
 Ultima Weapon Stage
 Great Salt Lake 2 (Abadon Fight)
-Esthar Road
-Ultimecia's Castle (bridge)
-Esthar (square?)
+Esthar City (Curved Blue Road, Blue Sky)
+Ultimecia's Castle (Bridge to Master Room)
+Esthar (Blue Road w/ Lunatic Pandora, Blue Sky)
 Esthar Sorceress Memorial (Unused)
-Esthar (cave?)
-Esthar (cave2?)
-Esthar (Centra excavation site)
-Esthar (Centra excavation site)
-Esthar (Centra excavation site)
-Esthar (Centra excavation site)
-Lunatic Pandora?
-Lunatic Pandora
-Lunatic Pandora(Adel?)
-(Centra excavation site)
-(Centra excavation site)
-(Centra excavation site)
-(Centra excavation site)
-? ?
-(Centra excavation site)
+Lunatic Pandora Laboratory
+Lunatic Pandora (Curved Path)
+Lunatic Pandora (Bridge)
+Lunatic Pandora (Bridge 2)
+Lunatic Pandora (Mobile Type 8 Fight area)
+Lunatic Pandora (Bridge 3)
+Lunatic Pandora Elevators
+Lunatic Pandora (Seifer Fight)
+Lunatic Pandora (Adel Fight)
+Centra Excavation Site (Elevator)
+Centra Excavation Site (Boulder Path)
+Centra Excavation Site (Yellow Gradiant)
+Centra Excavation Site (Pink Gradiant)
+Centra Excavation Site (Outside) (Unused?)
+Centra excavation site (Entrance
 Centra Ruins (Lower Level)
-Centra Ruins (Tower Level)
-Centra Ruins (Tower Level)
+Centra Ruins (Tower)
+Galbadian Grassy Plains (Night)
 Centra Ruins (Odin Room)
-Centra excavation site (Entrance)
+Trabia Canyon (Entrance)
 Trabia Canyon
-Ragnarok?
-Ragnarok?
+Ragnarok (Hangar)
+Ragnarok (Entrance)
 Diablos' Lair
 Deep Sea Research Center (Entrance)
-Deep Sea Research Center
-Deep Sea Research Center
-Deep Sea Research Center
-Deep Sea Research Center
-Deep Sea Research Center
-Deep Sea Research Center
+Deep Sea Research Center (Entrance 2)
+Deep Sea Research Center (Lv 1)
+Deep Sea Research Center (Lv 4/7)
+Deep Sea Research Center (Ocean Deposit Entrance)
+Deep Sea Research Center (Steam Room)
+Deep Sea Deposit
 Floating Platform during Time Compression
-? Esthar shops?
+Esthar City Shops (Red Sky)
 Tear's Point
-Esthar
-Ultimecia's Castle
-Ultimecia's Castle
-Ultimecia's Castle
-Ultimecia's Castle
+Esthar City (Red Sky)
+Ultimecia's Castle (Main Hall)
+Ultimecia's Castle (Bottom Grand Hall)
+Ultimecia's Castle (Passageway)
+Ultimecia's Castle (Stairway/Elecator Hall)
 Deling City (Edea's Room)
 Grassy Plains
 Badlands
@@ -113,35 +113,35 @@ Top of Plateau
 Next to Plateau on Grassy Plains
 Next to Plateau on Badlands
 Next to Snowy Mountains on Snow
-Esthar City
-Esthar City - Blue road w/ Lunatic Pandora (Unused)
+Esthar City (Outside Presidential Palace, Red Sky)
+Esthar City (Blue road w/ Lunatic Pandora) (Unused)
 Generic Landscape?
 Esthar City
-Esthar City
-Ultimecia's Castle
-Ultimecia's Castle
-Ultimecia's Castle
-Ultimecia's Castle
-Ultimecia's Castle
-Ultimecia's Castle
-Ultimecia's Castle
-Ultimecia's Castle
+Esthar City (Outside Presidential Palace, Blue Sky)
+Ultimecia's Castle (Countyard)
+Ultimecia's Castle (Chapel)
+Ultimecia's Castle (Treasure Room)
+Ultimecia's Castle (Clock Tower)
+Ultimecia's Castle (Prison Cell)
+Ultimecia's Castle (Armory)
+Ultimecia's Castle (Art Gallery)
+Ultimecia's Castle (Wine Cellar)
 Generic Landscape?
 Generic Landscape?
 Generic Landscape?
 Generic Landscape?
 Generic Landscape?
 Next to Balamb Mountains
-Esthar City Shop (Unused)
+Esthar City Shop (Blue Sky, Unused)
 Badlands (Night)
 Beach (Night)
 Commencement Room
-Ultimecia's Castle
-Ultimecia's Castle (Tiamat)
-Ultimecia's Castle
-Ultimecia's Castle
-Ultimecia's Castle
-Esthar City
+Ultimecia's Castle (Storage Room)
+Ultimecia's Castle (Tiamat Fight)
+Ultimecia's Castle (Terrace)
+Ultimecia's Castle (Waterway)
+Ultimecia's Castle (Master Room)
+Esthar City Shop (Blue Sky)
 Lunatic Pandora Lab
 Lunatic Pandora Lab
 Edea's Parade Vehicle

@@ -37,7 +37,7 @@ public class UnknownsPanel {
 		panel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, new Color(255, 255, 255), new Color(160, 160, 160)), "Unknowns - !! EDIT WITH CAUTION !!", TitledBorder.LEADING,
 				TitledBorder.TOP, null, null));
 
-		panel.setBounds(10, 614, 541, 133);
+		panel.setBounds(10, 614 + 74, 541, 133);
 		panel.setLayout(null);
 
 		unknown1Lbl = new JLabel("Unknown 0 Bytes:");
