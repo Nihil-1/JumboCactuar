@@ -138,7 +138,7 @@ public class MainWindow extends JFrame {
 	private ImageIcon fullSizeBattleStageIcon = null;
 	private int lastLoadedBattleStageImg = -1;
 
-	private final int BATTLE_STAGE_COUNT = 163; // or whatever your max is
+	private final int BATTLE_STAGE_COUNT = 163;
 
 	public static void main(String[] args) {
 		final File draggedAndDroppedFile;
@@ -1170,7 +1170,7 @@ public class MainWindow extends JFrame {
 		for (Encounter enc : encs) {
 			byte[] encounterBytes = enc.toBytes(); // Get the 128 bytes for the current encounter
 			System.arraycopy(encounterBytes, 0, dataToSave, offset, ENCOUNTER_SIZE);
-			offset += ENCOUNTER_SIZE; // Move the offset to the next available position
+			offset += ENCOUNTER_SIZE; // Move the offset to the next encounter
 		}
 		try (FileOutputStream out = new FileOutputStream(fileToSave)) {
 			out.write(dataToSave);
@@ -1248,11 +1248,10 @@ public class MainWindow extends JFrame {
 	private void about() {
 		// Create a JEditorPane to display HTML content
 		JEditorPane editorPane = new JEditorPane();
-		editorPane.setContentType("text/html"); // Crucial: tell it to render HTML
-		editorPane.setEditable(false); // Make it read-only
+		editorPane.setContentType("text/html");
+		editorPane.setEditable(false);
 		editorPane.setBackground(UIManager.getColor("OptionPane.background")); // Match dialog background
 
-		// The HTML content with your link
 		String htmlMessage = "<html><head><style>" + //
 				"body { " + //
 				"  font-family: Arial, sans-serif; /* Preferred font, fallback to generic sans-serif */" + //
@@ -1279,7 +1278,7 @@ public class MainWindow extends JFrame {
 				"</body></html>";//
 		editorPane.setText(htmlMessage);
 
-		// Add a HyperlinkListener to handle clicks on the links
+		// Handle clicks on the links
 		editorPane.addHyperlinkListener(new HyperlinkListener() {
 			@Override
 			public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -1425,7 +1424,7 @@ public class MainWindow extends JFrame {
 		if (thumbIcon != null) {
 			battleStageImgLbl.setIcon(thumbIcon);
 		} else {
-			// fallback if not loaded yet
+			// Fallback if not loaded yet
 			String idStr = String.format("%03d", id);
 			ImageIcon fallback = new ImageIcon("bs/" + idStr + ".png");
 			java.awt.Image scaled = fallback.getImage().getScaledInstance(187, -1, java.awt.Image.SCALE_SMOOTH);
